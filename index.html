@@ -1,0 +1,424 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Wishlist Savings</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #fff5f7;
+    color: #51434a;
+    padding: 20px;
+}
+
+.container {
+    max-width: 950px;
+    margin: auto;
+}
+
+header {
+    text-align: center;
+    padding: 30px 10px;
+}
+
+header h1 {
+    color: #d87598;
+    font-size: 30px;
+}
+
+header p {
+    margin-top: 10px;
+    color: #927b85;
+}
+
+.summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.box {
+    background: white;
+    padding: 20px;
+    border-radius: 18px;
+    box-shadow: 0 4px 15px #eacbd533;
+}
+
+.box p {
+    font-size: 13px;
+    color: #927b85;
+}
+
+.box h2 {
+    color: #d87598;
+    margin-top: 10px;
+    font-size: 20px;
+}
+
+.section {
+    background: white;
+    padding: 22px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px #eacbd533;
+}
+
+.section h2 {
+    color: #d87598;
+    margin-bottom: 18px;
+}
+
+input {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #f0d5df;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    outline: none;
+    font-size: 14px;
+}
+
+button {
+    border: none;
+    background: #e994af;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #d87598;
+}
+
+.wishlist {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.item {
+    background: #fff8fa;
+    border: 1px solid #f5dce5;
+    border-radius: 15px;
+    padding: 17px;
+}
+
+.item h3 {
+    color: #ca7192;
+    margin-bottom: 10px;
+}
+
+.item p {
+    font-size: 13px;
+    margin: 7px 0;
+}
+
+.progress {
+    background: #f4dfe7;
+    height: 12px;
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 12px 0;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #efabc1, #d87598);
+    border-radius: 20px;
+}
+
+.item input {
+    margin-top: 10px;
+}
+
+.item button {
+    margin-top: 5px;
+    font-size: 12px;
+    padding: 9px;
+}
+
+.delete {
+    background: #b8a1aa;
+}
+
+.history {
+    border-bottom: 1px solid #f5e5eb;
+    padding: 12px 0;
+    font-size: 14px;
+}
+
+.empty {
+    color: #aa929c;
+    font-size: 14px;
+    text-align: center;
+    padding: 20px;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    color: #aa929c;
+    font-size: 12px;
+}
+
+@media(max-width:600px) {
+    .summary {
+        grid-template-columns: 1fr;
+    }
+
+    .wishlist {
+        grid-template-columns: 1fr;
+    }
+
+    header h1 {
+        font-size: 24px;
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<header>
+    <h1>♡ My Wishlist Savings ♡</h1>
+    <p>Little savings, big dreams!</p>
+</header>
+
+<div class="summary">
+    <div class="box">
+        <p>Total Tabungan</p>
+        <h2 id="total">Rp0</h2>
+    </div>
+
+    <div class="box">
+        <p>Total Target Wishlist</p>
+        <h2 id="target">Rp0</h2>
+    </div>
+
+    <div class="box">
+        <p>Jumlah Wishlist</p>
+        <h2 id="jumlah">0</h2>
+    </div>
+</div>
+
+<div class="section">
+    <h2>♡ Tambahkan Wishlist</h2>
+
+    <input id="nama" placeholder="Nama barang impian...">
+    <input id="harga" type="number" min="1" placeholder="Target harga (Rp)">
+
+    <button onclick="tambahWishlist()">
+        + Tambah Wishlist
+    </button>
+</div>
+
+<div class="section">
+    <h2>♡ Wishlist Impianmu</h2>
+    <div class="wishlist" id="wishlist"></div>
+</div>
+
+<div class="section">
+    <h2>♡ Riwayat Tabungan</h2>
+    <div id="riwayat"></div>
+</div>
+
+<footer>
+    Made with ♡ | My Wishlist Savings
+</footer>
+
+</div>
+
+<script>
+let data = JSON.parse(
+    localStorage.getItem("tabunganWishlist")
+) || [];
+
+let history = JSON.parse(
+    localStorage.getItem("riwayatTabungan")
+) || [];
+
+function rupiah(angka) {
+    return "Rp" + angka.toLocaleString("id-ID");
+}
+
+function simpan() {
+    localStorage.setItem(
+        "tabunganWishlist",
+        JSON.stringify(data)
+    );
+
+    localStorage.setItem(
+        "riwayatTabungan",
+        JSON.stringify(history)
+    );
+}
+
+function tambahWishlist() {
+    let nama = document.getElementById("nama").value.trim();
+    let harga = Number(document.getElementById("harga").value);
+
+    if (!nama || harga <= 0 || !Number.isFinite(harga)) {
+        alert("Masukkan nama dan target harga yang benar!");
+        return;
+    }
+
+    data.push({
+        id: Date.now(),
+        nama: nama,
+        harga: harga,
+        tabungan: 0
+    });
+
+    simpan();
+    tampilkan();
+
+    document.getElementById("nama").value = "";
+    document.getElementById("harga").value = "";
+}
+
+function tambahUang(id) {
+    let item = data.find(x => x.id === id);
+
+    if (!item) return;
+
+    let jumlah = Number(
+        document.getElementById("uang" + id).value
+    );
+
+    if (!Number.isFinite(jumlah) || jumlah <= 0) {
+        alert("Masukkan jumlah tabungan yang benar!");
+        return;
+    }
+
+    if (item.tabungan + jumlah > item.harga) {
+        alert("Jumlah tabungan melebihi target wishlist!");
+        return;
+    }
+
+    item.tabungan += jumlah;
+
+    history.unshift({
+        nama: item.nama,
+        jumlah: jumlah,
+        tanggal: new Date().toLocaleDateString("id-ID")
+    });
+
+    simpan();
+    tampilkan();
+}
+
+function hapus(id) {
+    if (!confirm("Hapus wishlist ini?")) return;
+
+    data = data.filter(x => x.id !== id);
+
+    simpan();
+    tampilkan();
+}
+
+function tampilkan() {
+    let total = data.reduce(
+        (sum, x) => sum + x.tabungan, 0
+    );
+
+    let target = data.reduce(
+        (sum, x) => sum + x.harga, 0
+    );
+
+    document.getElementById("total").innerText =
+        rupiah(total);
+
+    document.getElementById("target").innerText =
+        rupiah(target);
+
+    document.getElementById("jumlah").innerText =
+        data.length;
+
+    let area = document.getElementById("wishlist");
+
+    if (data.length === 0) {
+        area.innerHTML =
+            '<div class="empty">Belum ada wishlist. Yuk tambahkan impianmu! ♡</div>';
+    } else {
+        area.innerHTML = data.map(item => {
+            let persen = Math.min(
+                (item.tabungan / item.harga) * 100,
+                100
+            );
+
+            let sisa = item.harga - item.tabungan;
+
+            return `
+            <div class="item">
+                <h3>♡ ${item.nama}</h3>
+
+                <p>Target: ${rupiah(item.harga)}</p>
+                <p>Terkumpul: ${rupiah(item.tabungan)}</p>
+                <p>Sisa: ${rupiah(sisa)}</p>
+
+                <div class="progress">
+                    <div class="progress-bar"
+                    style="width:${persen}%"></div>
+                </div>
+
+                <p>${persen.toFixed(1)}% tercapai</p>
+
+                ${sisa === 0
+                    ? "<b>🎉 Wishlist tercapai!</b>"
+                    : `
+                    <input type="number"
+                    id="uang${item.id}"
+                    min="1"
+                    placeholder="Masukkan uang tabungan">
+
+                    <button onclick="tambahUang(${item.id})">
+                    + Simpan Uang
+                    </button>
+                    `
+                }
+
+                <button class="delete"
+                onclick="hapus(${item.id})">
+                Hapus
+                </button>
+            </div>
+            `;
+        }).join("");
+    }
+
+    let riwayat = document.getElementById("riwayat");
+
+    if (history.length === 0) {
+        riwayat.innerHTML =
+            '<div class="empty">Belum ada riwayat tabungan.</div>';
+    } else {
+        riwayat.innerHTML = history.map(x => `
+            <div class="history">
+                ♡ ${x.nama}
+                <br>
+                + ${rupiah(x.jumlah)}
+                <br>
+                <small>${x.tanggal}</small>
+            </div>
+        `).join("");
+    }
+}
+
+tampilkan();
+</script>
+
+</body>
+</html>
